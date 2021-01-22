@@ -1,0 +1,434 @@
+<!--Snake AI-->
+<!DOCTYPE html><!-- by Carlos Rocha | github: @carlinhosrocha | 01/2021 | ezattas.com -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg" href="../svg/ezattas-ai.svg">
+    <title>Snake Game AI</title>
+    <style>
+        *{margin: 0; padding: 0; background: #000;}
+        svg#screen{background: #111; border: 2px solid #555; margin-bottom: -7px; position: absolute; left: 50%; margin-left: -300px; top: 50%; margin-top: -300px;}
+        section#painel{width: 600px; height: 200px; background: #111; border: 2px solid #555; position: absolute; left: 50%; margin-left: -300px; top: 50%; margin-top: 103px;}
+        ::-webkit-scrollbar{width: 10px; background: #111;}
+        ::-webkit-scrollbar-thumb{width: 10px; background: #333; border-radius: 5px;}
+    </style>
+</head>
+<body><!--tags das seções principais-->
+    <svg id="screen" width="600px" height="400px"></svg>
+    <section id="painel"></section>
+    <!--CÓDIGO DA DEFINIÇÃO DA TELA DE JOGO-->
+    <script>
+        // definição de variáveis:
+        var screen = document.getElementById("screen");
+        var svgns = "http://www.w3.org/2000/svg";
+        var pos_x = 0;
+        var pos_y = 0;
+        var branco = "#FFF";
+        var vermelho = "#F00";
+        var cinza = "#111";
+        var x = 15;
+        var y = 9;
+        var apagar = [15, 11];
+        var posAleatorio;
+        var colCauda = -1;
+        var speed = 50;
+        var play = true;
+        // função desenha linha:
+        function desenhaPixel(x, y, w, h, f, s, sw){
+            var rect = document.createElementNS(svgns, 'rect');
+            rect.setAttributeNS(null, 'class', 'pixel');
+            rect.setAttributeNS(null, 'x', x);
+            rect.setAttributeNS(null, 'y', y);
+            rect.setAttributeNS(null, 'width', w);
+            rect.setAttributeNS(null, 'height', h);
+            rect.setAttributeNS(null, 'fill', f);
+            rect.setAttributeNS(null, 'stroke', s);
+            rect.setAttributeNS(null, 'stroke-width', sw);
+            screen.appendChild(rect);
+        }
+        // looping para desenhar os pixels do jogo:
+        // 30 x 20 = 600
+        function desenhaTela(){
+            document.getElementById("screen").innerHTML = "";
+            pos_x = 0;
+            pos_y = 0;
+            for(var i = 0; i < 30; i++){ // loop para 30 pixels na horizontal
+            if(pos_x >= 600){ // se chegar na borda lateral
+                    pos_x = 0; // reseta variável
+                }
+            for(var k = 0; k < 20; k++){ // loop para 20 pixels na vertical
+                if(pos_y >= 400){ // se chegar na borda de fundo
+                    pos_y = 0; // reseta variável
+                }
+                desenhaPixel(pos_x, pos_y, 20, 20, '#111', '#FFF', 0); // chama a função que desenha o pixel
+                pos_y += 20; // acrescenta em y a largura do pixel
+            }
+            pos_x += 20; // acrescenta em x a largura do pixel
+            }
+        }
+        desenhaTela() // desenha a tela de jogo
+        var pixel = document.getElementsByClassName("pixel"); // cria uma matriz com todos o pixels
+        // função retorna posição do pixel com base nas coordenadas:
+        function retornarPosicao(p, f){
+            return (p[0] * 20) + p[1]; // p[0] == x | pos[1] == y
+        }
+        // função que colore pixel:
+        function colorirPixel(elemento, cor, id="none"){
+            try{
+                if(id == "branco"){
+                    pixel[elemento].setAttribute('fill', cor);
+                }
+                else{
+                    pixel[elemento].setAttribute('fill', cor);
+                }
+            }
+            catch{
+                console.log("");
+            }
+        }
+        // DEFINIÇÃO DAS VARIÁVEIS DO JOGO:
+        var snake = {
+            body:[[x, y]], // variável para guardar a posição de cada pixel do corpo da cobrinha
+            clear:[0, 0],
+            tamanho:[[15, 10]],
+            dir: 1, // direção da cobra
+            comprimento: 2,
+        }
+        var food = {
+            pos: null,
+            cor: '#F00'
+        }
+        // FUNÇÃO DE MOVIMENTO DA SNAKE:
+        function movimentoSnake(){
+            if(pixel[retornarPosicao(snake.body[0])].getAttribute("fill") == branco){
+                colCauda++;
+            }
+            colorirPixel(retornarPosicao(snake.body[0]), branco, "branco"); // acende o pixel da posição atual
+            colorirPixel(retornarPosicao(snake.tamanho[snake.tamanho.length - snake.comprimento]), cinza); // apaga o 'rastro'
+            snake.tamanho = snake.tamanho.slice(1, snake.tamanho.length) // apagando ultimo elemento da lista
+        }
+        var h;
+        var v;
+        // FUNÇÃO DE INICIO DO JOGO:
+        function playJogo(){
+            controlaTeclado();
+            if(play == true){ // condição de pausa do jogo
+            pegarFood()
+            colisaoParede();
+            colisaoCauda();
+            v = a;
+            h = b;
+            sensorSnake();
+            direcaoSnake();
+            snake.tamanho.push(snake.body[0])
+            movimentoSnake();
+            snake.clear = snake.body[0];
+            redeneural();
+            console.log(S)
+            }
+        }
+        // FUNÇÃO DA DIREÇÃO DA SNAKE:
+        function direcaoSnake(){
+            redeJogando();
+            if(v < a){
+                custo = 0.05 * (dist_food / dist_food);
+            }
+            if(h < b){
+                custo = -0.05 * (dist_food / dist_food);
+            }
+            if(snake.dir == 1){ // cima
+                snake.body[0] = [x, y--]; // decrementa em y para ir para cima
+            }
+            else if(snake.dir == 2){ // direita
+                snake.body[0] = [x++, y]; // acrescenta em x para ir para a direita
+            }
+            else if(snake.dir == 3){  // baixo
+                snake.body[0] = [x, y++]; // acrescenta em y para ir para a baixo
+            }
+            else if(snake.dir == 4){ // esquerda
+                snake.body[0] = [x--, y]; // decrementa em x para ir para a direita
+            }
+        }
+        // FUNÇÃO DE COLISÃO COM A PAREDE:
+        function colisaoParede(){
+            if(x < 0 || x > 29 || y < 0 || y > 19){ // condição de colisão
+                desenhaTela()
+                resetaPosicao()
+                foodAleatorio()
+                if(snake.dir == 1){
+                    custo = 0.1
+                }else if(snake.dir == 2){
+                    custo = -0.1
+                }else if(snake.dir == 3){
+                    custo = 0.1
+                }else if(snake.dir == 4){
+                    custo = -0.1
+                }
+            }
+        }
+        // FUNÇÃO DE COLISÃO COM A CAUDA:
+        function colisaoCauda(){
+            if(colCauda == 2){
+                desenhaTela()
+                resetaPosicao()
+                foodAleatorio()
+            }
+        }
+        // FUNÇÃO RESETA POSIÇÃO:
+        function resetaPosicao(){
+            x = 15;
+            y = 10;
+            snake.body[0] = [x, y];
+            snake.tamanho = [[15, 10]];
+            snake.comprimento = 2;
+            colCauda = -1;
+        }
+        // FUNÇÃO CONTROLA COM TECLADO:
+        function controlaTeclado(){
+            document.addEventListener('keypress', function(e){
+                if(e.which == 56){ // cima
+                    snake.dir = 1;
+                }
+                if(e.which == 54){
+                    snake.dir = 2; // direita
+                }
+                if(e.which == 50){
+                    snake.dir = 3; // baixo
+                }
+                if(e.which == 52){
+                    snake.dir = 4; // left
+                }
+                if(e.which == 53){
+                    if(play == false){
+                        play = true;
+                    }else{
+                        play = false;
+                    }
+                }
+            }, false);
+        }
+        // FUNÇÃO POSIÇÃO ALEATÓRIA DE FOOD:
+        function foodAleatorio(){
+            posAleatorio = Math.round(Math.random() * 600);
+            colorirPixel(posAleatorio, '#F00');
+        }
+        var pos_food_x;
+        var pos_food_y;
+        // FUNÇÃO PEGAR COMIDA:
+        function pegarFood(){
+            try{
+                pos_food_x = pixel[posAleatorio].getAttribute("x");
+                pos_food_y = pixel[posAleatorio].getAttribute("y");
+            }catch{
+                null;
+            }
+            if(retornarPosicao(snake.body[0]) == posAleatorio){
+                snake.comprimento++;
+                snake.tamanho.push([parseInt(pos_food_x)/30, parseInt(pos_food_y)/20]);
+                custo = 1;
+                foodAleatorio();
+            }
+        }
+        var dist_food;
+        var dist_top;
+        var dist_right;
+        var dist_bottom;
+        var dist_left;
+        var a;
+        var b;
+        // SENSORES DA SNAKE:
+        function sensorSnake(){
+            try{
+                pos_food_x = pixel[posAleatorio].getAttribute("x");
+                pos_food_y = pixel[posAleatorio].getAttribute("y");
+            }catch{
+                null;
+            }
+            dist_top = (snake.body[0][1]);
+            dist_right = 29 - (snake.body[0][0]);
+            dist_bottom = 19 - (snake.body[0][1]);
+            dist_left = (snake.body[0][0]);
+            a = (Math.abs((snake.body[0][1]) - (pos_food_y/20)))
+            b = (Math.abs((snake.body[0][0]) -(pos_food_x/20)))
+            dist_food = Math.floor(((a**2) + (b**2))**0.5) // teorema de pitágoras
+        }
+        colorirPixel(retornarPosicao(snake.body[0]), branco); // inicia no centro
+        foodAleatorio() // posição aleatorio da comida
+        setInterval(playJogo, speed); // chama a função a cada intervalo de tempo em milisegundos
+    </script>
+    <!--/////////////////////// REDE NEURAL ARTIFICIAL //////////////////////////////-->
+    <script>
+        // ARQUITETURA DA REDE:
+        // 10 neurônios sensores
+        // 5 neurônios de entrada
+        // 5 neurônios ocultos
+        // 4 neurônios de saída
+        // FUNÇÃO PARA MULTIPLICAR ELEMENTOS DE VETOR:
+        function produtovetor(a, b){
+            var soma = [];
+            for (var i=0; i < a.length; i++) { // loop para efetuar a soma
+                soma.push( parseFloat(a[i]) * parseFloat(b[i]) );
+            }
+            return soma; // retorna valor da soma
+        }
+        // FUNÇÃO  DE SOMA DOS ELEMENTOS DO VETOR:
+        function somatorio(x){
+            var total = 0;
+            for (var i = 0; i < x.length; i++){
+                total += x[i];
+            }
+            return total;
+        }
+        // FUNÇÃO PARA GERAR VALORES ALEATÓRIOS:
+        function uniform(){
+            return Math.random( );
+        }
+        // FUNÇÃO DE ATIVAÇÃO 1:
+        function tangenteHiperbolica(x){
+            var th = (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x));
+            return th;
+        }
+        // FUNÇÃO DE ATIVAÇÃO 2:
+        function sigmoid(x){
+            return 1 / (1 + Math.exp(-x));
+        }
+        // DEFINIÇÃO DE VARIÁVEIS E CONFIG. DA REDE:
+        var num_neuronios_sensores = 10;
+        var num_neuronios_entrada = 15;
+        var num_neuronios_oculto = 15;
+        var num_neuronios_saida = 1;
+        // CRIAÇÃO DOS NEURÔNIOS E PESOS DA REDE:
+        var X = []; // neurônios da camada de sensores
+        var E = []; // neurônios da camada de entrada
+        var O = []; // neurônios da camada oculta
+        var S = []; // neurônios de saída
+        var WEX = [[], [], [], [], []]; // pesos da camada de entrada
+        var WOE = [[], [], [], [], []]; // pesos da camada oculta
+        var WSO = [[], [], [], []]; // pesos da camada de saída
+        var vazio = [];
+        var matriz = [];
+        // OUTROS ELEMENTOS DA REDE:
+        var B = 1; // valor da constante bias (vies)
+        var custo = 0; // valor da taxa de custo
+        // INICIALIZAÇÃO DOS PESOS:
+        // =============== PESOS DE ENTRADA ==================//
+        for(var i = 0; i < num_neuronios_entrada; i++){
+            WEX.push(vazio);
+        }
+        for(var i = 0; i < num_neuronios_entrada; i++){
+            for(var j = 0; j < num_neuronios_sensores; j++){
+                matriz.push(uniform()) // camada de entrada
+            }
+            WEX[i] = matriz;
+            matriz = [];
+        }
+        // =============== PESOS DA OCULTA ==================//
+        for(var i = 0; i < num_neuronios_oculto; i++){
+            WOE.push(vazio);
+        }
+        for(var i = 0; i < num_neuronios_oculto; i++){
+            for(var j = 0; j < num_neuronios_entrada; j++){
+                matriz.push(uniform()) // camada oculta
+            }
+            WOE[i] = matriz;
+            matriz = [];
+        }
+        // =============== PESOS DE SAÍDA ==================//
+        for(var i = 0; i < num_neuronios_saida; i++){
+            WSO.push(vazio);
+        }
+        for(var i = 0; i < num_neuronios_saida; i++){
+            for(var j = 0; j < num_neuronios_oculto; j++){
+                matriz.push(uniform()) // camada saida
+            }
+            WSO[i] = matriz;
+            matriz = [];
+        }
+        // FUNÇÃO DEFINE ENTRADA:
+        function dados(){
+            // definição dos valores dos neurônios de entrada:
+            X = [(dist_top), (dist_right), (dist_bottom), (dist_left), (snake.body[0][0]), (snake.body[0][1]), (snake.comprimento), parseInt(pos_food_x)/20, parseInt(pos_food_y)/20, B];
+        }
+        // ALGORITMO DE PROPAGAÇÃO DOS DADOS PELA REDE:
+        function feedfoward(){
+            var t;
+            let s;
+            // valores dos neurônio da camada de entrada:
+            for(var j = 0; j < num_neuronios_entrada; j++){
+                s = 0
+                t = []
+                t = produtovetor(X, WEX[j])
+                for(let i = 0; i < t.length; i++){
+                    s += t[i];
+                }
+                E[j] = tangenteHiperbolica(s);
+            }
+            // valores dos neurônio da camada d oculta:
+            for(var j = 0; j < num_neuronios_oculto; j++){
+                s = 0
+                t = []
+                t = produtovetor(E, WOE[j])
+                for(let i = 0; i < t.length; i++){
+                    s += t[i];
+                }
+                O[j] = tangenteHiperbolica(s);
+            }
+            // valores dos neurônio da camada de saída:
+            for(var j = 0; j < num_neuronios_saida; j++){
+                s = 0
+                t = []
+                t = produtovetor(O, WSO[j])
+                for(let i = 0; i < t.length; i++){
+                    s += t[i];
+                }
+                S[j] = sigmoid(s);
+            }
+        }
+        // ATUALIZAÇÃO E AJUSTE DOS PESOS (MEMÓRIA):
+        function atualizaPesos(erro, alpha=0.01){
+            var entrada;// variáveis locais
+            // atualização dos pesos da camada de saida:
+            for (var i = 0; i < num_neuronios_saida; i++){
+                for(var j = 0; j < num_neuronios_oculto; j++){
+                    entrada = O[j];
+                    WSO[i][j] = WSO[i][j] + (alpha * entrada * erro) // atualização do peso
+                    //console.log(WSO[0])
+                }
+            }
+            // atualização dos pesos da camada oculta:
+            for (var i = 0; i < num_neuronios_oculto; i++){
+                for(var j = 0; j < num_neuronios_entrada; j++){
+                    entrada = E[j];
+                    WOE[i][j] = WOE[i][j] + (alpha * entrada * erro) // atualização do peso
+                }
+            }
+            // atualização dos pesos da camada de entrada:
+            for (var i = 0; i < num_neuronios_entrada; i++){
+                for(var j = 0; j < num_neuronios_sensores; j++){
+                    entrada = X[j];
+                    WEX[i][j] = WEX[i][j] + (alpha * entrada * erro) // atualização do peso
+                }
+            }
+            custo = 0; // reseta o custo;
+        }
+        // CRIAÇÃO DA FUNÇÃO PRINCIPAL DA REDE NEURAL:
+        function redeneural(){
+            dados(); // atualiza os dados
+            feedfoward(); // recebe o valor da saída
+            atualizaPesos(custo, 0.01); // backpropagation dos pesos
+        }
+        // REDE JOGANDO:
+        function redeJogando(){
+            if(S[0] >= 0 && S[0] < 0.25){
+                snake.dir = 1; // cima
+            }else if(S[0] >= 0.25 && S[0] < 0.5){
+                snake.dir = 2; // direita
+            }else if(S[0] >= 0.5 && S[0] < 0.75){
+                snake.dir = 3; // baixo
+            }else if(S[0] >= 0.75 && S[0] <= 1){
+                snake.dir = 4; // esquerda
+            }
+        }
+    </script>
+</body>
+</html>

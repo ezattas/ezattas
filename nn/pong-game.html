@@ -1,0 +1,453 @@
+<!DOCTYPE html><!-- Desenvolvido por Carlos Rocha | github: @carlinhosrocha | ezattas.com | 12/2020--><!--  -->
+<html>
+<head>
+	<title>Pong Game AI</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/svg" href="../svg/ezattas-ai.svg">
+	<style type="text/css">
+		*{margin: 0; padding: 0; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;}
+		body{background: #000;}
+		canvas{position: absolute; left: 50%; top: 50%; margin-top: -300px; margin-left: -300px; background: #111; border: 3px solid #333}
+		div#menu{display: flex; width: 607px; height: 40px; position: absolute; background: transparent; left: 50%; top: 50%; margin-left: -300px; margin-top: 300px; justify-content: center;}
+		button:hover{background: #AAA; color: #111; border-color: #AAA;}
+		button{width: 33.3%; height: 100%; background: #111; border: 2px solid #333; outline: none; cursor: pointer; font-family: "Arial"; color: #AAA; font-size: 20px; text-transform: uppercase; font-weight: 700}
+		svg#rede{background: #000; position: absolute; top: 50%; margin-top: -150px; margin-left: 30px}
+		svg#grafico{width: 400px; height: 200px; background: #222; position: absolute; right: 30px; top: 50%; margin-top: -150px;}
+		div#score{width: 400px; height: 45px; background: transparent; position: absolute; right: 30px; top: 50%; margin-top: 50px; display: flex; justify-content: center;}
+		div.boxs{width: 33.3%; height: 100%; background: #111; font-family: "Verdana"; text-transform: uppercase; color: #FFF; text-align: center; font-size: 12px; font-weight: 700; padding-top: 15px;}
+		line.erro{width: 1; height: 5; fill: #F00;}
+		p{color: #EEE}
+		p#taxaerro{color: #F00}
+		/*MODELO RESPONSIVO*/
+		#rede-cima{position: absolute; left: 50%; margin-left: -200px; top: 10px; background: #000;}
+		#grafico-baixo{width: 400px; height: 200px; background: #222; position: absolute; left: 50%; margin-left: -200px; top: 50%; margin-top: 370px;}
+		#score-baixo{width: 400px; height: 45px; background: transparent; position: absolute; left: 50%; margin-left: -200px; top: 50%; margin-top: 555px; display: flex;}
+	</style>
+</head>
+<body>
+	<canvas width="600" height="600" id="mycanvas">Browser sem suporte para este elemento :(</canvas>
+	<div id="menu">
+		<button id="up" onclick="clicabutton(1)">Up</button>
+		<button id="start" onclick="clicabutton(2)">Start</button>
+		<button id="down" onclick="clicabutton(3)">Down</button>
+	</div>
+	<svg width="400" height="300" id="rede"> <!-- animação da rede neural -->
+		<!-- pesos do primeiro neurônio da camada de entrada -->
+		<line id="pWXE1" x1="40" y1="37.5" x2="140" y2="112.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWXE1" x1="40" y1="112.5" x2="140" y2="112.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWXE1" x1="40" y1="187.5" x2="140" y2="112.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWXE1" x1="40" y1="262.5" x2="140" y2="112.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<!-- pesos do segundo neurônio da camada de entrada -->
+		<line id="pWXE2" x1="40" y1="37.5" x2="140" y2="187.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWXE2" x1="40" y1="112.5" x2="140" y2="187.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWXE2" x1="40" y1="187.5" x2="140" y2="187.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWXE2" x1="40" y1="262.5" x2="140" y2="187.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<!-- pesos do primeiro neurônio camada oculta -->
+		<line id="pWEO1" x1="140" y1="112.5" x2="240" y2="112.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWEO1" x1="140" y1="187.5" x2="240" y2="112.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<!-- pesos do segundo neurônio camada oculta -->
+		<line id="pWEO2" x1="140" y1="112.5" x2="240" y2="187.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWEO2" x1="140" y1="187.5" x2="240" y2="187.5" style="stroke: #00AAFF; stroke-width: 2" />
+		<!-- pesos do neurônio de saida -->
+		<line id="pWEO2" x1="240" y1="112.5" x2="340" y2="155" style="stroke: #00AAFF; stroke-width: 2" />
+		<line id="pWEO2" x1="240" y1="187.5" x2="340" y2="155" style="stroke: #00AAFF; stroke-width: 2" />
+		<!-- entrada de dados -->
+		<circle id="nX1" cx="40" cy="37.5" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+		<circle id="nX2" cx="40" cy="112.5" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+		<circle id="nX3" cx="40" cy="187.5" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+		<circle id="nB" cx="40" cy="262.5" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+		<!-- camada de entrada -->
+		<circle id="nE1" cx="140" cy="112.5" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+		<circle id="nE2" cx="140" cy="187.5" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+		<!-- camada oculta -->
+		<circle id="nO1" cx="240" cy="112.5" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+		<circle id="nO2" cx="240" cy="187.5" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+		<!-- saida -->
+		<circle id="nS" cx="340" cy="155" r="15" stroke="#0000FF" stroke-width="1" fill="#0055FF"/>
+	</svg>
+	<svg id="grafico">
+		<!-- coordenadas do gráfico -->
+		<!--<line x1="0" y1="0" x2="0" y2="300" style="stroke: #0055FF; stroke-width: 3" />-->
+		<!--<line x1="0" y1="300" x2="400" y2="300" style="stroke: #0055FF; stroke-width: 3" />-->
+	</svg>
+	<div id="score">
+		<div class="boxs" id="iaerror">AI Error: <p id="taxaerro">0.000</p></div>
+		<div class="boxs">AI Score: <p id="scoreplayeria">0</p></div>
+		<div class="boxs">Human Score: <p id="scoreplayerhu">0</p></div>
+	</div>
+	<script type="text/javascript">
+		var cont = 0;
+		var grafico = document.getElementById("grafico");
+		responsivo();
+		// pega todos os elemento dos neurôniE1:
+		var nB = document.getElementById("nB");
+		var nX1 = document.getElementById("nX1");
+		var nX2 = document.getElementById("nX2");
+		var nX3 = document.getElementById("nX3");
+		var nE1 = document.getElementById("nE1");
+		var nE2 = document.getElementById("nE2");
+		var nO1 = document.getElementById("nO1");
+		var nO2 = document.getElementById("nO2");
+		var nS = document.getElementById("nS");
+		// modelo responsivo:
+		function responsivo(){
+			if(screen.width < 750){
+				document.getElementById("rede").id = "rede-cima";
+				document.getElementById("grafico").id = "grafico-baixo";
+				document.getElementById("score").id = "score-baixo";
+			}
+		}
+		// função desenha erro:
+		function graficoerro(){
+			cont++;
+			if(cont <= 400){
+				grafico.innerHTML = grafico.innerHTML + '<rect id="rect" x="'+ cont +'" y="'+ (sigmoid(custo )*100)+'" width="1" height="2" fill="#FF0000" />';
+			}
+			else{
+				grafico.innerHTML = "";
+				cont = 0;
+			}
+			if(cont % 10 == 0){
+				document.getElementById("taxaerro").innerText = (Math.abs(custo.toFixed(3)));
+				document.getElementById("scoreplayeria").innerText = direita.score;
+				document.getElementById("scoreplayerhu").innerText = esquerda.score;
+			}
+		}
+		// função ativa neurônios:
+		function animaneuronios(){
+			graficoerro();
+			// neurônio de saida:
+			nS.style.fill = "#0055FF";
+			nS.style.stroke = "#0000FF";
+			if(S >= 0.5){
+				nS.style.fill = "#FFFF00";
+				nS.style.stroke = "#FFDD00";
+			}
+			nO1.style.fill = "#0055FF";
+			nO1.style.stroke = "#0055FF";
+			if(O1 >= 0){
+				nO1.style.fill = "#FFFF00";
+				nO1.style.stroke = "#FFDD00";
+			}
+			nO2.style.fill = "#0055FF";
+			nO2.style.stroke = "#0055FF";
+			if(O2 >= 0){
+				nO2.style.fill = "#FFFF00";
+				nO2.style.stroke = "#FFDD00";
+			}
+			nE1.style.fill = "#0055FF";
+			nE1.style.stroke = "#0055FF";
+			if(E1 >= 0){
+				nE1.style.fill = "#FFFF00";
+				nE1.style.stroke = "#FFDD00";
+			}
+			nE2.style.fill = "#0055FF";
+			nE2.style.stroke = "#0055FF";
+			if(E2 >= 0){
+				nE2.style.fill = "#FFFF00";
+				nE2.style.stroke = "#FFDD00";
+			} // [(bola.x/600), (bola.y/600), (esquerda.y/600), B];
+			nX1.style.fill = "#0055FF";
+			nX1.style.stroke = "#0055FF";
+			if((bola.x/600) >= 0.5){
+				nX1.style.fill = "#FFFF00";
+				nX1.style.stroke = "#FFDD00";
+			}
+			nX2.style.fill = "#0055FF";
+			nX2.style.stroke = "#0055FF";
+			if((bola.y/600) >= 0.5){
+				nX2.style.fill = "#FFFF00";
+				nX2.style.stroke = "#FFDD00";
+			}
+			nX3.style.fill = "#0055FF";
+			nX3.style.stroke = "#0055FF";
+			if((esquerda.y/600) >= 0.5){
+				nX3.style.fill = "#FFFF00";
+				nX3.style.stroke = "#FFDD00";
+			}
+			nB.style.fill = "#0055FF";
+			nB.style.stroke = "#0055FF";
+			if(B >= 0.5){
+				nB.style.fill = "#FFFF00";
+				nB.style.stroke = "#FFDD00";
+			}
+		}
+	</script>
+	<script type="text/javascript">
+		var canvas = document.getElementById("mycanvas"); //atribue elemento a uma variável
+		var ctx = canvas.getContext("2d"); //os elementos dispostos no canvas serão 2d
+		
+		var teclas = {};
+		var controle = 0;
+		var aivelocidade = 15;
+		var bola = {
+			x: canvas.width / 2 - 15, // inicia no centro de x
+			y: canvas.height / 2 - 15, // inicia no centro de y
+			altura: 30,
+			largura: 30,
+			dirx: -1, // direção em x
+			diry: 1, // direção em y
+			mod: 0,
+			speed: 5 // velocidade em pixel
+		};
+
+		var esquerda = {
+			x: 10,
+			y: canvas.height / 2 - 60, // inicia no centro
+			altura: 120,
+			largura: 30,
+			score: 0,
+			speed: 10
+		};
+		var direita = {
+			x: 560,
+			y: canvas.height / 2 - 60, // inicia no centro
+			altura: 120,
+			largura: 30,
+			score: 0,
+			speed: 10
+		};
+
+		function movebola() {
+			// colisão contra o jogador esquerdo:
+			if(bola.y + bola.altura >= esquerda.y && bola.y <= esquerda.y + esquerda.altura && bola.x <= esquerda.x + esquerda.largura) {
+				bola.dirx = 1;
+				bola.mod += 0.1; // incrementa velocidade da bola
+			}
+			// colisão contra o jogador direito:
+			else if (bola.y + bola.altura >= direita.y && bola.y <= direita.y + direita.altura && bola.x + bola.largura >= direita.x) {
+				bola.dirx = -1;
+				bola.mod += 0.1; // incrementa velocidade da bola
+			}
+			// colisão contra o topo do canvas:
+			if (bola.y <= 0) {
+				bola.diry = 1;
+				bola.mod += 0.1; // incrementa velocidade da bola
+			}
+			// colisão contra o fundo do canvas:
+			else if (bola.y + bola.altura >= canvas.height) {
+				bola.diry = -1;
+				bola.mod += 0.1; // incrementa velocidade da bola
+			}
+
+			bola.x += (bola.speed + bola.mod) * bola.dirx; // movimento da bola em x
+			bola.y += (bola.speed + bola.mod) * bola.diry; // movimento da bola em y
+
+			if (bola.x < esquerda.x + esquerda.largura - 40) { // condição de vitória
+				newgame("rede");
+			}
+			else if (bola.x + bola.largura > direita.x + 40) { // condição de vitória
+				newgame("player");
+			}
+		};
+
+		function newgame(winner) {
+			if (winner == "rede"){
+				esquerda.score++;
+			}
+			else{
+				direita.score++;
+				custo = custo * 10; // potencializa o erro em caso de derrota
+			}
+			// redefindo posições da bola:
+			bola.y = canvas.height / 2 - bola.altura / 2;
+			bola.x = canvas.width / 2 - bola.largura / 2;
+			bola.mod = 0; // zera modificador
+		};
+
+		function desenha() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height); // limpa a tela
+			movebloco();
+			if (controle == 1){ // condição para iniciar o jogo
+				movebola();
+				redeneural();
+				animaneuronios();
+			}
+
+			ctx.fillStyle = "white";
+			ctx.fillRect(esquerda.x, esquerda.y, esquerda.largura, esquerda.altura); // bloco da esquerda
+			ctx.fillRect(direita.x, direita.y, direita.largura, direita.altura); // bloco da direita
+			ctx.fillRect(bola.x, bola.y, bola.largura, bola.altura); // bola
+
+			//ctx.font = "15px Arial";
+			//ctx.fillText("PLAYER 1: " + esquerda.score, 10, 20); // score jogador da esquerda
+			//ctx.fillText("PLAYER 2: " + direita.score, 505, 20); // score jogador da direita
+		};
+
+		document.addEventListener("keydown", function(e) { // chama a função quando o evento for disparado
+			teclas[e.keyCode] = true;
+		});
+
+		document.addEventListener("keyup", function(e) { // chama a função quando o evento for cessado
+			delete teclas[e.keyCode];
+		});
+
+		function movebloco() {
+			// controle do jogador:
+			if(38 in teclas && direita.y > 0)
+				direita.y -= direita.speed;
+			else if(40 in teclas && direita.y + direita.altura < canvas.height)
+				direita.y += direita.speed;
+			if(17 in teclas)
+				//controle = 1; // start inicial com control
+				console.log('Start inicial com control.')
+			else if (16 in teclas)
+				//controle = 0; // pause com shift
+				console.log('Pause com shift.')
+		};
+
+		function clicabutton(x) { // função para clique do botão:
+			if (x == 1){
+				if(direita.y > 0){
+					direita.y -= 50; // move elemento
+				}	
+			}
+			else if (x == 2){
+				if(controle == 0){
+					controle = 1;
+					document.getElementById("start").innerText = "Pause";
+				}
+				else{
+					controle = 0;
+					document.getElementById("start").innerText = "Play";
+				}
+			}
+			else if (x == 3){
+				if(direita.y + direita.altura < canvas.height){
+					direita.y += 50; // move elemento
+				}	
+			}
+		}
+		
+		setInterval(desenha, 20); // chama a função a cada intervalo de tempo em milisegundos
+
+	</script>
+	<!-- REDE NEURAL: APRENDIZADO POR REFORÇO -->
+	<script type="text/javascript">
+		// função para somar vetores:
+		function produtovetor(a, b){
+			var soma = [];
+    		for (var i=0; i < a.length; i++) { // loop para efetuar a soma
+    			soma.push( parseFloat(a[i]) * parseFloat(b[i]) );
+    		}
+    		return soma; // retorna valor da soma
+		}
+		// função para gerar valores aleatórios:
+		function uniform(){
+			return Math.random();
+		}
+		// INICIALIZAÇÃO DOS PESOS:
+		var WXE1 = [uniform(), uniform(), uniform(), uniform()]; // 4 pesos primeiro neurônio da camada de entrada
+		var WXE2 = [uniform(), uniform(), uniform(), uniform()]; // 4 pesos segundo neurônio da camada de entrada
+		var WO1E = [uniform(), uniform()]; // 2 pesos primeiro neurônio da camada oculta
+		var WO2E = [uniform(), uniform()]; // 2 pesos segundo neurônio da camada oculta
+		var WS = [uniform(), uniform()]; // 2 pesos neurônio da camada de saída
+
+		// CRIAÇÃO DOS NEURÔNIOS DA REDE NEURAL:
+		var X; // dados para 'alimentação' da rede neural
+		var E1; // primeiro neurônio da camada de entrada
+		var E2; // segundo neurônio da camada de entrada
+		var O1; // primeiro neurônio da camada oculta
+		var O2; // segundo neurônio da camada oculta
+		var S = 0; // valor da saída
+		var B = 1; // valor da constante bias (vies)
+		var custo = 0; // valor da taxa de custo
+		var target = []; // valor dos dados para supervisão
+		var resul;
+
+		// FUNÇÃO DEFINE ENTRADA:
+		function dados(){
+			X = [(bola.x/600), (bola.y/600), (esquerda.y/600), B];
+			// cáculo do erro: centro da bola - centro da raquete
+			custo = ((bola.y+bola.altura/2) - (esquerda.y+esquerda.altura/2))/600; // calculo do erro
+		}
+		// FUNÇÃO  DE SOMA DOS ELEMENTOS DO VETOR:
+		function somatorio(x){
+			var total = 0;
+			for (var i = 0; i < x.length; i++){
+				total += x[i];
+			}
+			return total;
+		}
+		// FUNÇÃO DA REDE JOGANDO:
+		function controlerede(x){
+			if(x <= 0.5 && esquerda.y > 0){
+				esquerda.y -= aivelocidade; // move elemento para cima
+			}
+			else if(x > 0.5 && esquerda.y + esquerda.altura < canvas.height){
+				esquerda.y += aivelocidade; // move elemento para baixo
+			}
+		}
+
+		// CRIAÇÃO DA FUNÇÃO PRINCIPAL DA REDE NEURAL:
+		function redeneural(){
+			dados(); // atualiza os dados
+			feedfoward(); // recebe o valor da saída
+			controlerede(S); // rede assume o controle
+			atualizaPesos(custo, 0.01); // backpropagation dos pesos		
+		}
+		// ALGORITMO DE PROPAGAÇÃO DOS DADOS PELA REDE:
+		function feedfoward(){
+			//E1 = ((produtovetor(X, WXE1)))
+			//E2 = tangenteHiperbolica(somatorio(produtovetor(X, WXE2)))
+			E1 = tangenteHiperbolica(produtovetor(X, WXE1).reduce((E1, currentElement) => E1 + currentElement)); // valor do primeiro neurônio da camada de entrada
+			E2 = tangenteHiperbolica(produtovetor(X, WXE2).reduce((E2, currentElement) => E2 + currentElement)); // valor do segundo neurônio da camada de entrada
+			
+			O1 = tangenteHiperbolica(produtovetor([E1, E2], WO1E).reduce((O1, currentElement) => O1 + currentElement)); // valor do primeiro neurônio da camada oculta
+			O2 = tangenteHiperbolica(produtovetor([E1, E2], WO2E).reduce((O2, currentElement) => O2 + currentElement)); // valor do segundo neurônio da camada oculta
+
+			S = sigmoid(produtovetor([O1, O2], WS).reduce((resul, currentElement) => resul + currentElement)); // valor camada de saida
+		}
+
+		// FUNÇÃO DE ATIVAÇÃO 1:
+		function tangenteHiperbolica(x){
+			var th = (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x));
+			return th;
+		}
+		// FUNÇÃO DE ATIVAÇÃO 2:
+		function sigmoid(x){
+			return 1 / (1 + Math.exp(-x));
+		}
+		// ATUALIZAÇÃO E AJUSTE DOS PESOS (MEMÓRIA):
+		function atualizaPesos(erro, alpha=0.01){
+			var entrada, entrada1, entrada2; // variáveis locais
+
+			for (var i = 0; i < WS.length; i++){
+				if (i == 0)
+					entrada = O1; // primeiro neurônio da camada oculta
+				else if (i == 1)
+					entrada = O2; // sengundo neurônio da camada oculta
+
+				WS[i] = WS[i] + (alpha * entrada * erro) // atualização do peso
+			}
+			
+			for (var i = 0; i < WO1E.length; i++){
+				if (i == 0)
+					entrada1 = E1; // primeiro neurônio da camada de entrada
+				else if (i == 1)
+					entrada1 = E2; // segundo neurônio da camada de entrada
+
+				WO1E[i] = WO1E[i] + (alpha * entrada1 * erro); // atualização do peso
+			}
+
+			for (var i = 0; i < WO2E.length; i++){
+				if (i == 0)
+					entrada2 = E1; // primeiro neurônio da camada de entrada
+				else if (i == 1)
+					entrada2 = E2; // segundo neurônio da camada de entrada
+				
+				WO2E[i] = WO2E[i] + (alpha * entrada2 * erro); // atualização do peso
+			}
+
+			for (var i = 0; i < WXE1.length; i++){ // pesos do primeiro neurônio de entrada
+				WXE1[i] = WXE1[i] + (alpha * X[i] * erro);
+			}
+
+			for (var i = 0; i < WXE2.length; i++){ // pesos do segundo neurônio de entrada
+				WXE1[i] = WXE1[i] + (alpha * X[i] * erro);
+			}
+		}
+	</script>
+</body>
+</html>
