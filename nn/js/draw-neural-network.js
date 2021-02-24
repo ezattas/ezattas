@@ -1,10 +1,10 @@
 var vetor = document.getElementById("vetor");
 // variáveis de config. da rede:
-var num_camadas = 8; // NUMERO DE CAMADAS DA REDE
-var neuronios = [25, 15, 15, 20, 15, 10, 5, 2]; // NUMERO DE NEURONIOS EM CADA CAMADA
-var cor_neuronios = "#3850B0";
-var cor_contorno = "#183090";
-var cor_pesos = "#0FF";
+var num_camadas = 5; // NUMERO DE CAMADAS DA REDE
+var neuronios = [15, 10, 10, 5, 3]; // NUMERO DE NEURONIOS EM CADA CAMADA
+var cor_neuronios = "#AAA";
+var cor_contorno = "#DDD";
+var cor_pesos = "#DDD";
 var pos_x_neuronios = [];
 var pos_y_neuronios = [];
 // variáveis para definição do tamanho do vetor:

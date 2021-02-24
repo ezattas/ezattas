@@ -1,0 +1,192 @@
+<!DOCTYPE html><!--Carlos Rocha | Github: @carlinhosrocha | 01/2021-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg" href="../svg/ezattas-ai.svg">
+    <title>Draw NN</title>
+    <style>
+        *{margin: 0; padding: 0; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;}
+        body{background: #000; display: flex;}
+        svg{background: #111; border: 5px solid #151515; width: 600px; height: 600px; position: absolute; top: 50%; margin-top: -300px; left: 50%; margin-left: -300px;}
+        section#menu{width: 300px; height: 200px; background: #111; position: absolute; bottom: 10px; left: 10px; border: 5px solid #151515;}
+        h1{color: #FFF; text-align: center; font-size: 23px; font-family: "Arial"; margin-top: 5px}
+        .cores{width: 100%; height: 100%; opacity: 0; position: absolute; top: 0; cursor: pointer;}
+        div.colors{width: 280px; height: 30px; background: #3850B0; position: absolute; left: 50%; margin-left: -140px; margin-top: 10px;}
+        h2{margin-top: 5px; color: #111; text-align: center; font-size: 15px; font-family: "Arial"; text-transform: uppercase;}
+        #peso-cor{background: #0FF; margin-top: 50px;}
+        .numbers{width: 280px; height: 30px; background: #3850B0; position: absolute; left: 50%; margin-left: -140px; margin-top: 90px;}
+        .numeros{width: 100%; height: 100%; position: absolute; top: 0; cursor: pointer; border: none; outline: none; background: #333; color: #FFF; text-align: center; font-size: 17px; font-family: "Arial";}
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0;}
+        input[type=number]:hover{background: #222;}
+        button{width: 280px; height: 30px; background: #FFF; position: absolute; left: 50%; margin-left: -140px; margin-top: 130px; color: #000; border: none; outline: none; cursor: pointer; text-transform: uppercase; font-weight: 600; font-size: 17px;}
+        button:hover{background: #AAA;}
+        #btn{width: 280px; height: 30px; background: #FFF; position: absolute; left: 50%; margin-left: -140px; margin-top: 130px; color: #000; border: none; outline: none; cursor: pointer; text-transform: uppercase; font-weight: 600; font-size: 17px;}
+        #btn:hover{background: #AAA;}
+    </style>
+</head>
+<body>
+    <section id="menu" class="colors">
+        <h1>Neural Network</h1>
+        <form id="formulario">
+            <div id="neuro-cor" class="colors">
+                <h2>Neurons Color</h2>
+                <input type="color" id="cor-neuronio" value="#3850B0" class="cores">
+            </div>
+            <div id="peso-cor" class="colors">
+                <h2>Weights Color</h2>
+                <input type="color" id="cor-peso" value="#00FFFF" class="cores">
+            </div>
+            <div id="num-camadas" class="numbers">
+                <input type="number" class="numeros" placeholder="Layers Number" id="numeros">
+            </div>
+            <input type="submit" id="btn" value="Next Step">
+        </form>
+        <!--<button id="btn" onclick="Menu()">Next Step</button>-->
+    </section>
+    <svg id="vetor"></svg>
+    <script>
+        var cont = 0;
+        var p;
+        var matrizes = [];
+        var form = document.getElementById('formulario');
+        var neuron_color = document.getElementById('cor-neuronio');
+        var weight_color = document.getElementById('cor-peso');
+        var camadas = document.getElementById('numeros');
+        var btn = document.getElementById("btn");
+        var value_neuron_color;
+        var value_weight_color;
+        var value_camadas;
+        form.addEventListener('submit', function(e){
+            value_neuron_color = neuron_color.value;
+            value_weight_color = weight_color.value;
+            value_camadas = camadas.value;
+            if(cont == 0){
+                p = value_camadas;
+                camadas.value = ""; // reseta para exibir placeholder
+                camadas.setAttribute("placeholder", ((cont+1)+'° Layer'))
+            }else{
+                matrizes.push(parseInt(value_camadas))
+                camadas.value = ""; // reseta para exibir placeholder
+                camadas.setAttribute("placeholder", ((cont+1)+'° Layer'))
+            }
+            if(cont == p){
+                camadas.value = "";
+                camadas.setAttribute("placeholder", "")
+                btn.setAttribute("value", "Done!")
+                redeConfig();
+            }
+            cont++;
+            e.preventDefault();
+        });
+        function redeConfig(){
+            num_camadas = value_camadas;
+            cor_neuronios = value_neuron_color;
+            cor_pesos = value_weight_color;
+            neuronios = matrizes;
+            vetor.innerHTML = "";
+            vetor = document.getElementById("vetor");
+            desenhaNeuronios();
+            desenhaPesos();
+            desenhaSobre();
+        }
+        var menu = document.getElementById("menu");
+        var vetor = document.getElementById("vetor");
+        // variáveis de config. da rede:
+        var num_camadas; // NUMERO DE CAMADAS DA REDE
+        var neuronios = []; // NUMERO DE NEURONIOS EM CADA CAMADA
+        var cor_neuronios = "#3850B0";
+        var cor_contorno = "#183090";
+        var cor_pesos = "#0FF";
+        var pos_x_neuronios = [];
+        var pos_y_neuronios = [];
+        // variáveis para definição do tamanho do vetor:
+        var screen = document.getElementById("screen");
+        var svgns = "http://www.w3.org/2000/svg";
+        var vetor_largura = 600;
+        var vetor_altura = 600;
+        // disposição dos neurônios na tela:
+        var espaco_x_neuronios;
+        var espaco_y_neuronios;
+        var x;
+        var y;
+        var r_calc;
+        // função desenha os neurônios:
+        var c = 0;
+        function desenhaNeuronios(raio=r_calc){
+            r_calc = 10;
+            pos_x_neuronios = [];
+            pos_y_neuronios = [];
+            espaco_x_neuronios = vetor_largura / num_camadas;
+            espaco_y_neuronios = vetor_altura / maior(neuronios);
+            x = espaco_x_neuronios / 2;
+            y = espaco_y_neuronios / 2;
+            for(var i = 0; i < neuronios.length; i++){
+                y = (vetor_largura - (neuronios[i] * espaco_y_neuronios))/ 2 + (espaco_y_neuronios / 2);
+                for(var k = 0; k < neuronios[i]; k++){
+                    var circle = document.createElementNS(svgns, 'circle');
+                    circle.setAttributeNS(null, 'class', 'neuronio');
+                    circle.setAttributeNS(null, 'cx', x);
+                    circle.setAttributeNS(null, 'cy', y);
+                    circle.setAttributeNS(null, 'r', raio);
+                    circle.setAttributeNS(null, 'fill', cor_neuronios);
+                    circle.setAttributeNS(null, 'stroke-width', raio/(raio/2));
+                    circle.setAttributeNS(null, 'stroke', cor_contorno);
+                    vetor.appendChild(circle);
+                    pos_x_neuronios.push(x);
+                    pos_y_neuronios.push(y);
+                    y = y + espaco_y_neuronios;
+                }
+                x = x + espaco_x_neuronios;
+            }
+        }
+        // desenha linha:
+        function desenhaLinha(x1=0, y1=0, x2=0, y2=0){
+            var line = document.createElementNS(svgns, 'line');
+            line.setAttributeNS(null, 'class', 'peso');
+            line.setAttributeNS(null, 'x1', x1);
+            line.setAttributeNS(null, 'y1', y1);
+            line.setAttributeNS(null, 'x2', x2);
+            line.setAttributeNS(null, 'y2', y2);
+            line.setAttributeNS(null, 'stroke', cor_pesos);
+            line.setAttributeNS(null, 'stroke-width', 2);
+            vetor.appendChild(line);
+        }
+        // função para desenhar pesos:
+        function desenhaPesos(){
+            var neuro = document.getElementsByClassName("neuronio");
+            var x1, y1, x2, y2 = 0;
+            c = 0;
+            for(var j = 1; j < num_camadas; j++){
+                for(var i = 0; i < neuronios[j]; i++){
+                    x1 = neuro[(neuronios[j-1])+i+c].getAttribute("cx");
+                    y1 = neuro[(neuronios[j-1])+i+c].getAttribute("cy");
+                    for(var k = 0; k < neuronios[j-1]; k++){
+                        x2 = neuro[k+c].getAttribute("cx");
+                        y2 = neuro[k+c].getAttribute("cy");
+                        desenhaLinha(x1, y1, x2, y2);
+                    }
+                }
+                c = c + neuronios[j-1]
+            }
+        }
+        // função sobe neurônios para camada de cima:
+        function desenhaSobre(){
+            desenhaNeuronios();
+        }
+        // função que retorna o maior valor de uma lista:
+        function maior(matriz){
+            var m = matriz[0];
+            for(var i = 0; i < matriz.length; i++){
+                if(m < matriz[i]){
+                    m = matriz[i];
+                }
+            }
+            console.log(m);
+            return m;
+        }
+        //desenhaNeuronios();
+        //desenhaPesos();
+        //desenhaSobre();
+    </script>
+</body>
+</html>
