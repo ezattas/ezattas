@@ -1,48 +1,108 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Rastreamento Vitima OBR</title>
+	<title>Circuito</title>
 	<style>
-		/*estilização padrão*/
-		*{margin: 0; padding: 0; outline: 0}
-		body{background: #000;}
-		section{width: 700px; height: 700px; background: transparent; position: absolute; top: 300px; bottom: 0; right: 0; left: 0; margin: auto; border: none; margin-top: -290px}
-		nav#box-superior{width: 100%; height: 50%; background: transparent; position: relative; display: flex;}
-		nav#box-inferior{width: 100%; height: 50%; background: transparent; position: relative; display: flex;}
-		svg{width: 50%; height: 100%; background: transparent;}
-		div{width: 50%; height: 100%; background: transparent;}
-		svg#screen-one{border: 2px solid #222;}
-		/*design responsivo para mobile*/
-		@media only screen and (max-device-width: 500px) {
-			section{width: 300px; height: 1200px; background: transparent; position: absolute; margin-left: 50%; transform: translateX(-50%); border: none;}
-			nav#box-superior{width: 300px; height: 600px; background: transparent; position: relative; display: block;}
-			nav#box-inferior{width: 300px; height: 600px; background: transparent; position: relative; display: block;}
-			svg{width: 100%; height: 50%; background: transparent;}
-			div{width: 100%; height: 50%; background: transparent;}
-			svg#screen-one{border: 2px solid #222;}
+		/*configurações padrão*/
+		*{margin: 0; padding: 0; outline: 0; -webkit-user-select: none; user-select: none;}
+		body{background: #000}
+		section{width: 90%; height: 95%; background: transparent; position: absolute; left: 50%; transform: translateX(-50%); top: 10px; display: flex;}
+		nav{width: 50%; height: 100%; background: #000;}
+		svg#screen{width: calc(100% - 4px); height: calc(100% - 4px); background: #111; border: 2px solid #222;}
+		svg#nn-animation{width: 100%; height: 50%; background: transparent;}
+		div#content{width: 100%; height: calc(50% - 35px); background: transparent;}
+		h1{color: #FFF; font-family: "arial"; text-transform: uppercase; text-align: center; font-size: 30px}
+		/*estilização mobile*/
+		@media only screen and (max-device-width: 380px){
+			section{display: block; top: 30px}
+			nav{width: 100%; height: 50%;}
+			h1{margin-top: 20px}
 		}
 	</style>
 </head>
 <body>
 	<section>
-		<nav id="box-superior">
-			<svg id="screen-one"></svg>
-			<div id="content-one"></div>
+		<nav id="screen-box">
+			<svg id="screen"></svg>
 		</nav>
-		<nav id="box-inferior">
-			<div id="content-two"></div>
-			<svg id="screen-two"></svg>
+		<nav id="text-box">
+			<h1>Redes Neurais</h1>
+			<div id="content">
+				
+			</div>
+			<svg id="nn-animation">
+				
+			</svg>
 		</nav>
 	</section>
-</body>
 <script>
-	var screen_one = document.getElementById('screen-one');
-	var screen_two = document.getElementById('screen-two');
-	const screen_one_width = screen_one.clientWidth;
-	const screen_one_height = screen_one.clientHeight;
-	const screen_two_width = screen_two.clientWidth;
-	const screen_two_height = screen_two.clientHeight;
+	var screen = document.getElementById("screen")
+	var svgns = "http://www.w3.org/2000/svg";
+	var screen_width = document.getElementById("screen").clientWidth;
+	var screen_height = document.getElementById("screen").clientHeight;
+	console.log(screen_width + " x " + screen_height);
 
+	function drawBall(id, cx, cy, r, f, sw, s){
+		var circle = document.createElementNS(svgns, 'circle');
+        circle.setAttributeNS(null, 'id', id);
+        circle.setAttributeNS(null, 'cx', cx);
+        circle.setAttributeNS(null, 'cy', cy);
+        circle.setAttributeNS(null, 'r', r);
+        circle.setAttributeNS(null, 'fill', f);
+        circle.setAttributeNS(null, 'stroke-width', sw);
+        circle.setAttributeNS(null, 'stroke', s);
+        screen.appendChild(circle);
+	}
+	function drawSign(s, x1, y1, x2, y2){
+		var sign = document.createElementNS(svgns, 'line');
+		sign.setAttributeNS(null, 'id', "sign");
+		sign.setAttributeNS(null, 'fill', "none");
+		sign.setAttributeNS(null, 'stroke', s);
+		sign.setAttributeNS(null, 'x1', x1);
+		sign.setAttributeNS(null, 'y1', y1);
+		sign.setAttributeNS(null, 'x2', x2);
+		sign.setAttributeNS(null, 'y2', y2);
+		screen.appendChild(sign);
+	}
+	function moveRobot(x, y){
+		var robot = document.getElementById("robot");
+		var sensor = document.getElementById("sensor");
+		robot.style.cx = x;
+		sensor.style.cx = x;
+		robot.style.cy = y;
+		sensor.style.cy = y;
+	}
+	function moveSign(x, y){
+		var signs = document.getElementById("sign");
+		signs.setAttribute("x2", x);
+		signs.setAttribute("y2", y);
+	}
+	drawBall('robot', (screen_width/2), (screen_height/2), 30, "#0ccc", 2, "#0ccc");
+	drawSign("#0ff", (screen_width/2), (screen_height/2), 0, 0)
+	drawBall('sensor', (screen_width/2), (screen_height/2), 10, "#0ccc", 2, "#0ff");
+	var cont = 0;
+	var speed = 1;
+	const timer = setInterval(function(){
+		if(cont < screen_width){
+			moveSign(cont, 0);
+		}else{
+			if(cont < (screen_width + screen_height)){
+				moveSign(screen_width, (cont - screen_height))
+			}else{
+				if(cont < (screen_width + screen_width + screen_height)){
+					moveSign((screen_width + screen_height + screen_width) - cont, screen_height)
+				}else{
+					if(cont < (2 * screen_width + 2 * screen_height)){
+						moveSign(0, (screen_width + screen_width + screen_height + screen_height) - cont)
+					}
+					else{
+						cont = 0;
+					}
+				}
+			}
+		}
+		cont++;
+	}, 0.5);
 </script>
+</body>
 </html>
