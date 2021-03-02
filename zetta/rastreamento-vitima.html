@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Vitima OBR</title>
+	<title>Circuito</title>
 	<style>
 		/*configurações padrão*/
 		*{margin: 0; padding: 0; outline: 0; -webkit-user-select: none; user-select: none;}
@@ -14,7 +13,7 @@
 		div#content{width: 100%; height: calc(50% - 35px); background: transparent;}
 		h1{color: #FFF; font-family: "arial"; text-transform: uppercase; text-align: center; font-size: 30px}
 		/*estilização mobile*/
-		@media only screen and (max-device-width: 450px){
+		@media only screen and (max-device-width: 380px){
 			section{display: block; top: 30px}
 			nav{width: 100%; height: 50%;}
 			h1{margin-top: 20px}
@@ -41,6 +40,9 @@
 	var svgns = "http://www.w3.org/2000/svg";
 	var screen_width = document.getElementById("screen").clientWidth;
 	var screen_height = document.getElementById("screen").clientHeight;
+	var robot_x = screen_width / 2;
+	var robot_y = screen_height / 2;
+	var cont = 0;
 	console.log(screen_width + " x " + screen_height);
 
 	function drawBall(id, cx, cy, r, f, sw, s){
@@ -54,56 +56,77 @@
         circle.setAttributeNS(null, 'stroke', s);
         screen.appendChild(circle);
 	}
-	function drawSign(s, x1, y1, x2, y2){
+	function drawSign(s, x1, y1, x2, y2, id="sign", so=0.1){
 		var sign = document.createElementNS(svgns, 'line');
-		sign.setAttributeNS(null, 'id', "sign");
+		sign.setAttributeNS(null, 'id', id);
 		sign.setAttributeNS(null, 'fill', "none");
 		sign.setAttributeNS(null, 'stroke', s);
 		sign.setAttributeNS(null, 'x1', x1);
 		sign.setAttributeNS(null, 'y1', y1);
 		sign.setAttributeNS(null, 'x2', x2);
 		sign.setAttributeNS(null, 'y2', y2);
+		sign.setAttributeNS(null, 'stroke-opacity', so);
 		screen.appendChild(sign);
 	}
 	function moveRobot(x, y){
 		var robot = document.getElementById("robot");
 		var sensor = document.getElementById("sensor");
+		var signs = document.getElementById("sign");
+		robot_x = x;
+		robot_y = y;
 		robot.style.cx = x;
 		sensor.style.cx = x;
 		robot.style.cy = y;
 		sensor.style.cy = y;
+		signs.setAttribute("x1", robot_x);
+		signs.setAttribute("y1", robot_y);
 	}
 	function moveSign(x, y){
 		var signs = document.getElementById("sign");
 		signs.setAttribute("x2", x);
 		signs.setAttribute("y2", y);
 	}
-	drawBall('robot', (screen_width/2), (screen_height/2), 30, "#0ccc", 2, "#0ccc");
-	drawSign("#0ff", (screen_width/2), (screen_height/2), 0, 0)
-	drawBall('sensor', (screen_width/2), (screen_height/2), 10, "#0ccc", 2, "#0ff");
-	var cont = 0;
-	var speed = 1;
+	function start(){
+		drawBall('robot', (screen_width/2), (screen_height/2), 30, "#0ccc", 2, "#0ccc");
+		drawSign("#0ff", (screen_width/2), (screen_height/2), 0, 0, "sign", 1)
+		drawBall('sensor', (screen_width/2), (screen_height/2), 10, "#0ccc", 2, "#0ff");
+		vitima()
+	}
+	function vitima(){
+		drawBall('ball', getRandom(screen_width), getRandom(screen_height), 10, '#ddd', 2, '#fff')
+	}
+	function getRandom(max) {
+    	return Math.floor(Math.random() * max + 1)
+	}
+	start()
 	const timer = setInterval(function(){
+		cont++;	
 		if(cont < screen_width){
 			moveSign(cont, 0);
+			drawSign('#066', robot_x, robot_y, cont, 0, "sinal", 0.05)
 		}else{
 			if(cont < (screen_width + screen_height)){
 				moveSign(screen_width, (cont - screen_height))
+				drawSign('#066', robot_x, robot_y, screen_width, (cont - screen_height) - 5, "sinal", 0.05)
 			}else{
 				if(cont < (screen_width + screen_width + screen_height)){
 					moveSign((screen_width + screen_height + screen_width) - cont, screen_height)
+					drawSign('#066', robot_x, robot_y, (screen_width + screen_height + screen_width) - cont, screen_height, "sinal", 0.05)
 				}else{
 					if(cont < (2 * screen_width + 2 * screen_height)){
 						moveSign(0, (screen_width + screen_width + screen_height + screen_height) - cont)
+						drawSign('#066', robot_x, robot_y, 0, (screen_width + screen_width + screen_height + screen_height) - cont, "sinal", 0.05)
 					}
 					else{
 						cont = 0;
+						var node = document.getElementById("screen");
+						node.innerHTML = "";
+						start();
 					}
 				}
 			}
 		}
-		cont++;
-	}, 0.5);
+	}, 1);
 </script>
 </body>
 </html>
