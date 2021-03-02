@@ -13,7 +13,7 @@
 		div#content{width: 100%; height: calc(50% - 35px); background: transparent;}
 		h1{color: #FFF; font-family: "arial"; text-transform: uppercase; text-align: center; font-size: 30px}
 		/*estilização mobile*/
-		@media only screen and (max-device-width: 380px){
+		@media only screen and (max-device-width: 450px){
 			section{display: block; top: 30px}
 			nav{width: 100%; height: 50%;}
 			h1{margin-top: 20px}
@@ -91,6 +91,7 @@
 		drawSign("#0ff", (screen_width/2), (screen_height/2), 0, 0, "sign", 1)
 		drawBall('sensor', (screen_width/2), (screen_height/2), 10, "#0ccc", 2, "#0ff");
 		vitima()
+		//moveRobot(300, 400)
 	}
 	function vitima(){
 		drawBall('ball', getRandom(screen_width), getRandom(screen_height), 10, '#ddd', 2, '#fff')
@@ -108,6 +109,7 @@
 			if(cont < (screen_width + screen_height)){
 				moveSign(screen_width, (cont - screen_height))
 				drawSign('#066', robot_x, robot_y, screen_width, (cont - screen_height) - 5, "sinal", 0.05)
+				//console.log(parseInt(((robot_x - cont)**2 + ((robot_y - (cont - screen_height))**2))**(1/2)))
 			}else{
 				if(cont < (screen_width + screen_width + screen_height)){
 					moveSign((screen_width + screen_height + screen_width) - cont, screen_height)
