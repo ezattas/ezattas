@@ -108,7 +108,7 @@
 		}else{
 			if(cont < (screen_width + screen_height)){
 				moveSign(screen_width, (cont - screen_height))
-				drawSign('#066', robot_x, robot_y, screen_width, (cont - screen_height) - 5, "sinal", 0.05)
+				drawSign('#066', robot_x, robot_y, screen_width, (cont - screen_height), "sinal", 0.05)
 				//console.log(parseInt(((robot_x - cont)**2 + ((robot_y - (cont - screen_height))**2))**(1/2)))
 			}else{
 				if(cont < (screen_width + screen_width + screen_height)){
