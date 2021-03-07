@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Circuito</title>
+	<title>Rastreamento de Vítima - OBR</title>
 	<style>
 		/*configurações padrão*/
 		*{margin: 0; padding: 0; outline: 0; -webkit-user-select: none; user-select: none;}
@@ -26,7 +26,7 @@
 			<svg id="screen"></svg>
 		</nav>
 		<nav id="text-box">
-			<h1>Redes Neurais</h1>
+			<h1>Rastreamento de Vítima - OBR</h1>
 			<div id="content">
 				
 			</div>
@@ -102,7 +102,7 @@
 	start()
 	const timer = setInterval(function(){
 		cont++;	
-		if(cont < screen_width){
+		if(cont <= screen_width){
 			moveSign(cont, 0);
 			drawSign('#066', robot_x, robot_y, cont, 0, "sinal", 0.05)
 		}else{
@@ -111,7 +111,7 @@
 				drawSign('#066', robot_x, robot_y, screen_width, (cont - screen_height)-5, "sinal", 0.05)
 				//console.log(parseInt(((robot_x - cont)**2 + ((robot_y - (cont - screen_height))**2))**(1/2)))
 			}else{
-				if(cont < (screen_width + screen_width + screen_height)){
+				if(cont <= (screen_width + screen_width + screen_height)){
 					moveSign((screen_width + screen_height + screen_width) - cont, screen_height)
 					drawSign('#066', robot_x, robot_y, (screen_width + screen_height + screen_width) - cont, screen_height, "sinal", 0.05)
 				}else{
