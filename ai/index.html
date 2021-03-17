@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    <link rel="icon" type="image/svg" href="./svg/ezattas.svg">
 	<title>eZattas AI</title>
 	<style>
 		@font-face {font-family: Ubuntu; src: url(../fonts/ubuntu.ttf)}
 		*{margin: 0; padding: 0}
-		body{background: #000; font-family: Ubuntu; color: #FFF; text-align: left; line-height: 20px; user-select: none;}
+		body{background: #000; font-family: Ubuntu; color: #FFF; text-align: left; line-height: 20px; user-select: none; outline: none;}
 		nav#menu{width: 100%; height: 65px; background: #000; border-bottom: 1px solid transparent; position: fixed;}
 		nav#sombra-menu{width: 100%; height: 65px;}
 		img#logo{position: relative; height: 65px; margin-left: 20px; cursor: pointer;}
@@ -16,7 +18,10 @@
 		li:hover{color: #AAB}
 		::-webkit-scrollbar{width: 7px; background: #111}
 		::-webkit-scrollbar-thumb{width: 7px; background: #555}
-		p{text-align: justify; margin: 0px}
+		p{text-align: justify; margin: 10px}
+		@media only screen and (max-device-width: 450px){
+			ul{display: none;}
+		}
 	</style>
 </head>
 <body>
